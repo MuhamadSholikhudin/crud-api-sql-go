@@ -118,7 +118,7 @@ func Post(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-	fmt.Println(r.Form)
+	fmt.Println(data)
 
 	db, err := Conn()
 	if err != nil {

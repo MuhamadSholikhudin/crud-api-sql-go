@@ -16,14 +16,16 @@
             var id = document.getElementById("id").value;
             var name = document.getElementById("name").value;
 
+            var payload = JSON.stringify({
+                name: name,
+                id: parseInt(id)
+            });
+
             $.ajax({
                 type: "POST",
                 url: "http://127.0.0.1:8080/user",
                 dataType: "json",
-                data : {
-                    id: id,
-                    name : name
-                },
+                data : payload,
                 success (data){
                     alert(data);
                 },
