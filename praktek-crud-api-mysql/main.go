@@ -137,6 +137,7 @@ func Post(w http.ResponseWriter, r *http.Request) {
 	response := map[string]interface{}{
 		"status": "Oke",
 	}
+
 	err = json.NewEncoder(w).Encode(response)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -168,7 +169,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err.Error())
 		return
 	}
-	fmt.Println("insert success!")
+	fmt.Println("Updated success!")
 
 	response := map[string]interface{}{
 		"status": "Oke",
@@ -185,21 +186,19 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	//untuk membuat json pertama kita harus set Header
 	w.Header().Set("Content-Type", "application/json")
 
-	//mendecode requset body langsung menjadi json
-	data := User{}
-	err := json.NewDecoder(r.Body).Decode(&data)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+	vars := mux.Vars(r)
+	id_r, _ := strconv.Atoi(vars["id"])
 
-	db, err := Conn()
+	var db, err = Conn()
 	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
 	defer db.Close()
 
-	_, err = db.Exec("delete from user where id = ?", data.Id)
+	user_id := id_r
+
+	_, err = db.Exec("delete from user where id = ?", user_id)
 	if err != nil {
 		fmt.Println(err.Error())
 		return
@@ -221,58 +220,10 @@ func main() {
 
 	r := mux.NewRouter()
 	r.HandleFunc("/user", Index).Methods("GET")
+	r.HandleFunc("/user", Post).Methods("POST")
 	r.HandleFunc("/user/{id}", Get).Methods("GET")
 	r.HandleFunc("/user/{id}", Update).Methods("PUT")
-	r.HandleFunc("/user", Post).Methods("POST")
 	r.HandleFunc("/user/{id}", Delete).Methods("DELETE")
-
-	// http.HandleFunc("/user", func(w http.ResponseWriter, r *http.Request) {
-
-	// 	//mwnginiliasi method
-	// 	switch r.Method {
-	// 	case "GET":
-	// 		//untuk membuat json pertama kita harus set Header
-	// 		w.Header().Set("Content-Type", "application/json")
-
-	// 		//cara parsing struct ke json
-	// 		// data := map[string]interface{}{
-	// 		// 	"id":   1,
-	// 		// 	"name": "mahmud",
-	// 		// }
-
-	// 		// json marshal convert json ke object
-	// 		resp, err := json.Marshal(datas)
-	// 		if err != nil {
-	// 			http.Error(w, err.Error(), http.StatusInternalServerError)
-	// 		}
-
-	// 		w.Write([]byte(resp))
-
-	// 	case "POST":
-	// 		//untuk membuat json pertama kita harus set Header
-	// 		w.Header().Set("Content-Type", "application/json")
-
-	// 		// data := r.Body
-	// 		//mendecode requset body langsung menjadi json
-	// 		data := User{}
-	// 		err := json.NewDecoder(r.Body).Decode(&data)
-	// 		if err != nil {
-	// 			http.Error(w, err.Error(), http.StatusInternalServerError)
-	// 		}
-	// 		fmt.Println(data)
-	// 		datas = append(datas, data)
-	// 		response := map[string]interface{}{
-	// 			"status": "Oke",
-	// 		}
-	// 		err = json.NewEncoder(w).Encode(response)
-	// 		if err != nil {
-	// 			http.Error(w, err.Error(), http.StatusInternalServerError)
-	// 			return
-	// 		}
-	// 	}
-
-	// 	// w.Write([]byte("response ini"))
-	// })
 
 	fmt.Println("LIsten on Port 127.0.0.1:8080")
 	http.ListenAndServe(":8080", r)
